@@ -169,7 +169,6 @@ namespace Avogadro
     case SymmetrizeCrystalIndex:
       return tr("&Crystallography") + '>' + tr("Space&group");
     case PrimitiveReduceIndex:
-    case PrimitiveReduceStandardIndex:
     case NiggliReduceIndex:
       return tr("&Crystallography") + '>' + tr("&Reduce");
     case BuildSlabIndex:
@@ -381,9 +380,6 @@ namespace Avogadro
       break;
     case PrimitiveReduceIndex:
       actionPrimitiveReduce();
-      break;
-    case PrimitiveReduceStandardIndex:
-      actionPrimitiveReduceStandard();
       break;
     case NiggliReduceIndex:
       actionNiggliReduce();
@@ -1993,7 +1989,7 @@ namespace Avogadro
     // fix coordinates
     // Apply COB matrix:
     Eigen::Matrix3d invCob;
-    invCob = cob.inverse();
+    cob.computeInverse(&invCob);
     for (QList<Eigen::Vector3d>::iterator
            it = fcoords.begin(),
            it_end = fcoords.end();
@@ -2194,14 +2190,6 @@ namespace Avogadro
     m_actions.append(a);
     CE_CACTION_DEBUG(PrimitiveReduceIndex);
     CE_CACTION_ASSERT(PrimitiveReduceIndex);
-
-    // PrimitiveReduceStandardIndex,
-    a = new QAction(tr("Reduce Cell (&Primitive Reduce and Standardize)"),
-                    this);
-    a->setData(++counter);
-    m_actions.append(a);
-    CE_CACTION_DEBUG(PrimitiveReduceStandardIndex);
-    CE_CACTION_ASSERT(PrimitiveReduceStandardIndex);
 
     // NiggliReduceIndex,
     a = new QAction(tr("Reduce Cell (&Niggli)"), this);
@@ -2440,7 +2428,6 @@ namespace Avogadro
            QMessageBox::Yes | QMessageBox::No,
            QMessageBox::Yes)
           == QMessageBox::Yes) {
-        actionSpgTolerance();
         return actionPerceiveSpacegroup();
       }
       else {
@@ -2615,7 +2602,6 @@ namespace Avogadro
            QMessageBox::Yes | QMessageBox::No,
            QMessageBox::Yes)
           == QMessageBox::Yes) {
-        actionSpgTolerance();
         return actionSymmetrizeCrystal();
       }
       else {
@@ -2631,7 +2617,6 @@ namespace Avogadro
            QMessageBox::Yes | QMessageBox::No,
            QMessageBox::Yes)
           == QMessageBox::Yes) {
-        actionSpgTolerance();
         return actionSymmetrizeCrystal();
       }
       else {
@@ -2752,9 +2737,7 @@ namespace Avogadro
   void CrystallographyExtension::actionPrimitiveReduce()
   {
     CEUndoState before (this);
-    bool standardize = false;
-    unsigned int spg = Spglib::reduceToPrimitive(m_molecule, 0,
-                                                 m_spgTolerance, standardize);
+    unsigned int spg = Spglib::reduceToPrimitive(m_molecule, 0, m_spgTolerance);
     // spg == 0: Spacegroup perception failed
     if (spg == 0) {
       if (QMessageBox::question
@@ -2780,40 +2763,6 @@ namespace Avogadro
     CEUndoState after (this);
     pushUndo(new CEUndoCommand (before, after,
                                 tr("Reduce to Primitive Cell")));
-
-    emit cellChanged();
-  }
-
-  void CrystallographyExtension::actionPrimitiveReduceStandard()
-  {
-    CEUndoState before (this);
-    bool standardize = true;
-    unsigned int spg = Spglib::reduceToPrimitive(m_molecule, 0,
-                                                 m_spgTolerance, standardize);
-    // spg == 0: Spacegroup perception failed
-    if (spg == 0) {
-      if (QMessageBox::question
-          (m_mainwindow, CE_DIALOG_TITLE,
-           tr("Spacegroup perception failed.\n\nWould you "
-              "like to try again with a different tolerance?"),
-           QMessageBox::Yes | QMessageBox::No,
-           QMessageBox::Yes)
-          == QMessageBox::Yes) {
-        actionSpgTolerance();
-        return actionPrimitiveReduceStandard();
-      }
-      else {
-        return;
-      }
-    }
-
-    Spglib::Dataset set = Spglib::getDataset(m_molecule,
-                                             currentCell(), m_spgTolerance);
-    currentCell()->SetSpaceGroup(Spglib::toOpenBabel(set));
-
-    CEUndoState after (this);
-    pushUndo(new CEUndoCommand (before, after,
-                                tr("Reduce to Standard Primitive Cell")));
 
     emit cellChanged();
   }

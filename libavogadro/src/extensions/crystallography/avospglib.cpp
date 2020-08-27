@@ -326,7 +326,7 @@ namespace Avogadro {
     unsigned int reduceToPrimitive(QList<Eigen::Vector3d> *fcoords,
                                    QList<unsigned int> *atomicNums,
                                    Eigen::Matrix3d *cellMatrix,
-                                   const double cartTol, bool standardize)
+                                   const double cartTol)
     {
       Q_ASSERT(fcoords->size() == atomicNums->size());
 
@@ -380,11 +380,9 @@ namespace Avogadro {
 
       // Find primitive cell. This updates lattice, positions, types
       // to primitive
-      bool toPrimitive = true;
       int numPrimitiveAtoms =
-        spg_standardize_cell(lattice, positions, types,
-                             numBravaisAtoms, toPrimitive,
-                             !standardize, cartTol);
+        spg_find_primitive(lattice, positions, types,
+                           numBravaisAtoms, cartTol);
 
       // If the cell was already a primitive cell, reset
       // numPrimitiveAtoms.
@@ -442,13 +440,13 @@ namespace Avogadro {
     unsigned int reduceToPrimitive(QList<Eigen::Vector3d> *fcoords,
                                    QStringList *ids,
                                    Eigen::Matrix3d *cellMatrix,
-                                   const double cartTol, bool standardize)
+                                   const double cartTol)
     {
       QList<unsigned int> atomicNums = symbolsToAtomicNumbers(*ids);
 
       unsigned int spg =
         reduceToPrimitive(fcoords, &atomicNums,
-                          cellMatrix, cartTol, standardize);
+                          cellMatrix, cartTol);
 
       // Save some time if spg couldn't be found.
       if (spg <= 0 || spg > 230) {
@@ -464,7 +462,7 @@ namespace Avogadro {
 
     unsigned int reduceToPrimitive(Molecule * mol,
                                    OpenBabel::OBUnitCell * cell,
-                                   const double cartTol, bool standardize)
+                                   const double cartTol)
     {
       Q_ASSERT(mol);
       if (!cell) {
@@ -480,7 +478,7 @@ namespace Avogadro {
 
       unsigned int spg =
         reduceToPrimitive(&fcoords, &atomicNums,
-                          &cellMatrix, cartTol, standardize);
+                          &cellMatrix, cartTol);
 
       // Save some time if no change
       if (spg <= 0 || spg > 230) {
@@ -641,7 +639,6 @@ namespace Avogadro {
       applyToMolecule(mol, cell, fcoords, atomicNums, cellMatrix);
 
       Dataset set = getDataset(fcoords, atomicNums, cellMatrix, cartTol);
-
       cell->SetSpaceGroup(toOpenBabel(set));
 
       return spg;

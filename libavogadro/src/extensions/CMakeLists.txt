@@ -76,7 +76,7 @@ if(ENABLE_PYTHON AND ALL_PYTHON_FOUND)
   target_link_libraries(pythonterminal ${PYTHON_LIBRARIES})
 
   file(GLOB python_SCRIPTS "python/*.py")
-  install(FILES ${python_SCRIPTS} DESTINATION ${SHARE_INSTALL_PREFIX}/libavogadro/extensionScripts)
+  install(FILES ${python_SCRIPTS} DESTINATION share/libavogadro/extensionScripts)
 endif()
 
 ### Animation
@@ -110,7 +110,7 @@ if(GLEW_FOUND)
   file(GLOB shader_FRAG "shaders/*.frag")
   file(GLOB shader_PARAMS "shaders/*.params")
   install(FILES ${shader_VERT} ${shader_FRAG} ${shader_PARAMS}
-      DESTINATION ${SHARE_INSTALL_PREFIX}/libavogadro/shaders)
+    DESTINATION share/libavogadro/shaders)
 endif()
 
 ### super cells
@@ -147,4 +147,3 @@ add_subdirectory(swcntbuilder)
 add_subdirectory(qtaim)
 add_subdirectory(quantuminput)
 add_subdirectory(orca)
-add_subdirectory(yaehmop)

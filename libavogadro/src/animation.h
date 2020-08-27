@@ -34,7 +34,7 @@
 
 #include <vector>
 
-class QTimer;
+class QTimeLine;
 
 namespace Avogadro {
 
@@ -93,9 +93,9 @@ namespace Avogadro {
        */
       int fps() const;
       /**
-       * @return Whether to loop the animation.
+       * @return The loopCount (0 = repeat forever).
        */
-      bool loop() const;
+      int loopCount() const;
       /**
        * @return The total number of frames in the animation.
        */
@@ -117,26 +117,13 @@ namespace Avogadro {
        */
       void setFps(int fps);
       /**
-       * Set whether to loop the animation.
+       * Set the loop count. (0 = repeat forever)
        */
-      void setLoop(const bool loop);
+      void setLoopCount(int loops);
       /**
        * Set the current frame. 
        */
       void setFrame(int i);
-
-      /**
-       * React to changes to the slider by updating the state of the time line.
-       */
-      void sliderChanged(int i);
-      /**
-       * React to the slider being pressed by pausing the animation.
-       */
-      void sliderPressed();
-      /**
-       * React to the slider being released by unpausing the animation.
-       */
-      void sliderReleased();
 
       /**
        * Enable/disable dynamic bond detection. For QM reactions for example.
@@ -156,22 +143,11 @@ namespace Avogadro {
        */
       void stop();
 
-      /**
-       * Proceeds to the next frame, or loops or stops the animation.
-       */
-      void timerFired();
-
-    private:
-      /**
-       * Starts the timer with the appropriate timeout interval.
-       */
-      void startTimer();
-
     private:
       AnimationPrivate * const d;
       
       Molecule *m_molecule;
-      QTimer *m_timer;
+      QTimeLine *m_timeLine;
       std::vector< std::vector< Eigen::Vector3d> *> m_originalConformers;
       std::vector< std::vector< Eigen::Vector3d> *> m_frames;
   };

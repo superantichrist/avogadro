@@ -47,7 +47,7 @@ namespace Avogadro
 
       CameraPrivate() {};
 
-      Eigen::Projective3d modelview, projection;
+      Eigen::Transform3d modelview, projection;
       const GLWidget *parent;
       double angleOfViewY;
       double orthoScale;
@@ -169,20 +169,20 @@ namespace Avogadro
 
   double Camera::distance(const Eigen::Vector3d & point) const
   {
-    return ( d->modelview * point.homogeneous() ).head<3>().norm();
+    return ( d->modelview * point ).norm();
   }
 
-  void Camera::setModelview(const Eigen::Projective3d &matrix)
+  void Camera::setModelview(const Eigen::Transform3d &matrix)
   {
     d->modelview = matrix;
   }
 
-  const Eigen::Projective3d & Camera::modelview() const
+  const Eigen::Transform3d & Camera::modelview() const
   {
     return d->modelview;
   }
 
-  Eigen::Projective3d & Camera::modelview()
+  Eigen::Transform3d & Camera::modelview()
   {
     return d->modelview;
   }

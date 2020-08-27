@@ -1,12 +1,9 @@
 set(spglib_SRCS
-  arithmetic.c
   cell.c
   debug.c
-  delaunay.c
   hall_symbol.c
   lattice.c
   mathfunc.c
-  niggli.c
   pointgroup.c
   primitive.c
   refinement.c
@@ -14,7 +11,6 @@ set(spglib_SRCS
   spg_database.c
   spglib.c
   symmetry.c
-  kgrid.c
   kpoint.c
   site_symmetry.c
   sitesym_database.c

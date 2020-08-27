@@ -29,7 +29,6 @@
 #include <avogadro/atom.h>
 #include <avogadro/bond.h>
 #include <avogadro/molecule.h>
-#include <iostream>
 
 using namespace Eigen;
 using namespace std;
@@ -222,7 +221,7 @@ namespace Avogadro {
   {
     if (m_rootNode) {
       //Rotate skeleton around a particular axis and center point
-      Eigen::Projective3d rotation;
+      Eigen::Transform3d rotation;
       rotation = Eigen::AngleAxisd(angle, rotationAxis);
       rotation.pretranslate(centerVector);
       rotation.translate(-centerVector);
@@ -249,11 +248,11 @@ namespace Avogadro {
   // ##########  recursiveRotate  ##########
 
   void SkeletonTree::recursiveRotate(Node* n,
-                                     const Eigen::Projective3d &rotationMatrix)
+                                     const Eigen::Transform3d &rotationMatrix)
   {
     // Update the root node with the new position
     Atom* a = n->atom();
-    a->setPos((rotationMatrix * (*a->pos()).homogeneous()).head<3>());
+    a->setPos(rotationMatrix * (*a->pos()));
     a->update();
 
     // Now update the children

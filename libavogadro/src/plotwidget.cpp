@@ -61,8 +61,7 @@ namespace Avogadro {
         cBackground( Qt::black ), cForeground( Qt::white ), cGrid( Qt::gray ),
         showGrid( false ), showObjectToolTip( true ), useAntialias( false ),
         font( QFont() ), followingMouse(false), jailedInDefaults(false),
-        labelShiftDirection(None),
-        axisWidth(1)
+        labelShiftDirection(None)
     {
       // create the axes and setting their default properties
       PlotAxis *leftAxis = new PlotAxis();
@@ -132,9 +131,6 @@ namespace Avogadro {
     // Wether can move away default limits rectangle
     bool jailedInDefaults;
     Direction labelShiftDirection;
-
-    // The width of the axes and tick markers. Default is 1.
-    int axisWidth;
   };
 
   PlotWidget::PlotWidget( QWidget * parent )
@@ -188,7 +184,7 @@ namespace Avogadro {
       if (po->points().isEmpty()) return;
       xmin = xmax = po->points().first()->x();
       ymin = ymax = po->points().first()->y();
-
+      
       foreach ( PlotPoint *pp, po->points() ) {
         if (pp->x() < xmin) xmin = pp->x();
         if (pp->x() > xmax) xmax = pp->x();
@@ -546,12 +542,6 @@ namespace Avogadro {
     update();
   }
 
-  void PlotWidget::setAxisWidth( int w )
-  {
-    d->axisWidth = w;
-    update();
-  }
-
   void PlotWidget::setShowGrid( bool show ) {
     d->showGrid = show;
     update();
@@ -650,7 +640,7 @@ namespace Avogadro {
           if (newX1 > defaultDataRect().left() || (newX2 < defaultDataRect().right())) {
             newX1 = dataRect().x();
             newX2 = dataRect().x() + dataRect().width();
-          }
+          }            
         }
         if (defaultDataRect().height() > 0) {
           if (newY1 < defaultDataRect().top() || (newY2 > defaultDataRect().bottom())) {
@@ -663,7 +653,7 @@ namespace Avogadro {
             newY2 = dataRect().y() + dataRect().height();
           }
         }
-      }
+      }      
       setLimits(newX1, newX2, newY1, newY2);
       mouseClickOrigin = event->posF();
     }
@@ -707,7 +697,7 @@ namespace Avogadro {
       QPointF pF ( mapToWidget(mapFrameToData(event->pos())));
       QPoint p_widget ( static_cast<int>(pF.x()), static_cast<int>(pF.y()));
       QPointF p_data = mapFrameToData(event->posF());
-      PlotPoint *p_near = pointNearestPoint(p_widget);
+      PlotPoint *p_near = pointNearestPoint(p_widget); 
       emit pointClicked(p_data.x(), p_data.y());
       emit pointClicked(pointsUnderPoint(p_widget));
       if (p_near) emit pointClicked(p_near);
@@ -925,7 +915,7 @@ namespace Avogadro {
     float xStep = 0.5*bestRect.width();
     float yStep = 0.5*bestRect.height();
      switch(d->labelShiftDirection) {
-      case Up:
+      case Up:        
         bestRect = fm.boundingRect( QRectF( pos.x(), pos.y()-3*yStep, 1, 1 ), textFlags, pp->label() );
         break;
       case Down:
@@ -967,7 +957,7 @@ namespace Avogadro {
       QRectF upRect = bestRect;
       upRect.moveTop( upRect.top() + yStep );
       if (d->labelShiftDirection != Down)
-        upCost = d->rectCost( upRect );
+        upCost = d->rectCost( upRect );        
       QRectF downRect = bestRect;
       downRect.moveTop( downRect.top() - yStep );
       if (d->labelShiftDirection != Up)
@@ -1050,7 +1040,7 @@ namespace Avogadro {
           iter = -1; //anticipating the ++iter below
     // TODO: remove code duplication
      switch(d->labelShiftDirection) {
-      case Up:
+      case Up:        
         bestRect = fm.boundingRect( QRectF( pos.x(), pos.y()-3*yStep, 1, 1 ), textFlags, pp->label() );
         break;
       case Down:
@@ -1080,11 +1070,11 @@ namespace Avogadro {
       ++iter;
     }
 
-    QPen oldpen = painter->pen();
+    QPen oldpen = painter->pen();      
     QPen pen(oldpen);
     pen.setColor(d->cForeground);
     painter->setPen( pen );
-
+      
     //Place label
     painter->drawText( bestRect, textFlags, pp->label() );
 
@@ -1543,9 +1533,7 @@ namespace Avogadro {
       }
     }
 
-    QPen pen(foregroundColor());
-    pen.setWidth(d->axisWidth);
-    p->setPen(pen);
+    p->setPen( foregroundColor() );
     p->setBrush( Qt::NoBrush );
 
     /*** BottomAxis ***/
@@ -1622,7 +1610,7 @@ namespace Avogadro {
 
           //Draw ticklabel
           if ( a->areTickLabelsShown() ) {
-            QRect r( int(px) - BIGTICKSIZE, (int)-2*BIGTICKSIZE, 2*BIGTICKSIZE, BIGTICKSIZE );
+            QRect r( int(px) - BIGTICKSIZE, (int)-1.5*BIGTICKSIZE, 2*BIGTICKSIZE, BIGTICKSIZE );
             p->drawText( r, Qt::AlignCenter | Qt::TextDontClip, a->tickLabel( xx ) );
           }
         }
@@ -1638,7 +1626,7 @@ namespace Avogadro {
 
       // Draw TopAxis Label
       if ( ! a->label().isEmpty() ) {
-        QRect r( 0, 0 - 2.5*YPADDING, d->pixRect.width(), YPADDING );
+        QRect r( 0, 0 - 3*YPADDING, d->pixRect.width(), YPADDING );
         p->drawText( r, Qt::AlignCenter, a->label() );
       }
     }  //End of TopAxis

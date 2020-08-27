@@ -19,7 +19,6 @@
 using Eigen::Vector3d;
 using std::vector;
 
-#include <iostream>
 #include <fstream>
 
 namespace OpenQube

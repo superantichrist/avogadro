@@ -373,22 +373,22 @@ namespace Avogadro {
       result = tr("Copernicium");
       break;
     case 113:
-      result = tr("Nihonium");
+      result = tr("Ununtrium");
       break;
     case 114:
       result = tr("Flerovium");
       break;
     case 115:
-      result = tr("Moscovium");
+      result = tr("Ununpentium");
       break;
     case 116:
       result = tr("Livermorium");
       break;
     case 117:
-      result = tr("Tennessine");
+      result = tr("Ununseptium");
       break;
     case 118:
-      result = tr("Oganesson");
+      result = tr("Ununoctium");
       break;
 
     default:

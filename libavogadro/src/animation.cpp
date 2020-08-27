@@ -30,7 +30,7 @@
 #include <openbabel/mol.h>
 #include <Eigen/Core>
 
-#include <QTimer>
+#include <QTimeLine>
 
 using namespace OpenBabel;
 using Eigen::Vector3d;
@@ -40,27 +40,27 @@ namespace Avogadro {
   class AnimationPrivate
   {
     public:
-      AnimationPrivate() : fps(25), framesSet(false), dynamicBonds(false),
-                           loop(false), paused(false)
-      {
-      }
+      AnimationPrivate() : fps(25), framesSet(false), dynamicBonds(false) {}
 
       int fps;
       bool framesSet;
       bool dynamicBonds;
-      bool loop;
-      bool paused;
   };
 
   Animation::Animation(QObject *parent) : QObject(parent), d(new AnimationPrivate),
-                                          m_molecule(0), m_timer(new QTimer)
+                                          m_molecule(0), m_timeLine(new QTimeLine)
   {
-    connect(m_timer, SIGNAL(timeout()), this, SLOT(timerFired()));
+    // in chemical animations, each frame should take the same time
+    m_timeLine->setCurveShape(QTimeLine::LinearCurve);
   }
 
   Animation::~Animation()
   {
-    delete m_timer;
+    if (m_timeLine) {
+      delete m_timeLine;
+      m_timeLine = 0;
+    }
+
     delete d;
   }
 
@@ -75,6 +75,8 @@ namespace Avogadro {
       for (unsigned int i = 0; i < molecule->numConformers(); ++i) {
         m_originalConformers.push_back(molecule->conformer(i));
       }
+    } else {
+      m_timeLine->setFrameRange( 1, m_molecule->numConformers() );
     }
   }
 
@@ -94,23 +96,17 @@ namespace Avogadro {
  
   void Animation::setFps(int fps)
   {
-    if (fps < 1)
-      fps = 1;
-
     d->fps = fps;
-
-    if (m_timer->isActive())
-      startTimer();
   }
 
-  bool Animation::loop() const
+  int Animation::loopCount() const
   {
-    return d->loop;
+    return m_timeLine->loopCount();
   }
 
-  void Animation::setLoop(const bool loop)
+  void Animation::setLoopCount(int loops)
   {
-    d->loop = loop;
+    m_timeLine->setLoopCount(loops);
   }
 
   void Animation::setFrame(int i)
@@ -150,27 +146,6 @@ namespace Avogadro {
     m_molecule->update();
     emit frameChanged(i);
   }
-
-  void Animation::sliderChanged(int i)
-  {
-    setFrame(i);
-  }
-
-  void Animation::sliderPressed()
-  {
-    if (m_timer->isActive()) {
-      d->paused = true;
-      m_timer->stop();
-    }
-  }
-
-  void Animation::sliderReleased()
-  {
-    if (d->paused) {
-      d->paused = false;
-      startTimer();
-    }
-  }
  
   bool Animation::dynamicBonds() const
   {
@@ -197,6 +172,7 @@ namespace Avogadro {
  
     d->framesSet = true;
     m_frames = frames;
+    m_timeLine->setFrameRange(1, numFrames() );
   }
 
   void Animation::stop()
@@ -204,7 +180,10 @@ namespace Avogadro {
     if(!m_molecule)
       return;
 
-    m_timer->stop();
+    m_timeLine->stop();
+    m_timeLine->setCurrentTime(0);
+    disconnect(m_timeLine, SIGNAL(frameChanged(int)),
+            this, SLOT(setFrame(int)));
 
     // restore original conformers
     if (d->framesSet) {
@@ -220,8 +199,6 @@ namespace Avogadro {
     if(!m_molecule)
       return;
 
-    startTimer();
-
     // set molecule conformers
     if (d->framesSet) {
       m_molecule->lock()->lockForWrite();
@@ -230,33 +207,24 @@ namespace Avogadro {
       m_molecule->lock()->unlock();
     }
 
-    if (m_molecule->currentConformer() + 1 == m_molecule->numConformers())
-      setFrame(1);
+    if (d->fps < 1.0)
+      d->fps = 1.0;
+    int interval = 1000 / d->fps;
+    m_timeLine->setUpdateInterval(interval);
+    int duration = interval * numFrames();
+    m_timeLine->setDuration(duration);
+    m_timeLine->setFrameRange( 1,numFrames() );
+
+    connect(m_timeLine, SIGNAL(frameChanged(int)),
+            this, SLOT(setFrame(int)));
+    setFrame(1);
+    m_timeLine->setCurrentTime(0);
+    m_timeLine->start();
   }
   
   void Animation::pause()
   {
-    m_timer->stop();
-  }
-
-  void Animation::timerFired()
-  {
-    const unsigned int currentConformer = m_molecule->currentConformer();
-    if (currentConformer + 1 == m_molecule->numConformers()) {
-      if (d->loop) {
-        setFrame(1);
-      } else {
-        m_timer->stop();
-      }
-    } else {
-      setFrame(currentConformer + 1 + 1);
-    }
-  }
-
-  void Animation::startTimer()
-  {
-    const int interval = 1000 / d->fps;
-    m_timer->start(interval);
+    m_timeLine->stop();
   }
 
 } // end namespace Avogadro

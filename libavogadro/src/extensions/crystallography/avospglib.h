@@ -218,15 +218,13 @@ namespace Avogadro {
      * @param atomicNums Atomic numbers of atoms
      * @param cellMatrix Unit cell matrix as row vectors.
      * @param cartTol Tolerance in same units as cellMatrix.
-     * @param standardize Whether or not to standardize the cell.
      *
      * @return Spacegroup number if found, 0 otherwise.
      */
     unsigned int reduceToPrimitive(QList<Eigen::Vector3d> *fcoords,
                                    QList<unsigned int> *atomicNums,
                                    Eigen::Matrix3d *cellMatrix,
-                                   const double cartTol = AVOSPGLIB_TOL,
-                                   bool standardize = false);
+                                   const double cartTol = AVOSPGLIB_TOL);
 
     /**
      * @overload
@@ -238,15 +236,13 @@ namespace Avogadro {
      * @param ids Element symbols of atoms.
      * @param cellMatrix Unit cell matrix as row vectors.
      * @param cartTol Tolerance in same units as cellMatrix.
-     * @param standardize Whether or not to standardize the cell.
      *
      * @return Spacegroup number if found, 0 otherwise.
      */
     unsigned int reduceToPrimitive(QList<Eigen::Vector3d> *fcoords,
                                    QStringList *ids,
                                    Eigen::Matrix3d *cellMatrix,
-                                   const double cartTol = AVOSPGLIB_TOL,
-                                   bool standardize = false);
+                                   const double cartTol = AVOSPGLIB_TOL);
 
     /**
      * @overload
@@ -258,14 +254,12 @@ namespace Avogadro {
      * @param cell OpenBabel OBUnitCell to use for cell info. If 0
      * (default), mol->OBUnitCell() is used.
      * @param cartTol Tolerance in same units as cellMatrix.
-     * @param standardize Whether or not to standardize the cell.
      *
      * @return Spacegroup number if found, 0 otherwise.
      */
     unsigned int reduceToPrimitive(Molecule *mol,
                                    OpenBabel::OBUnitCell *cell = 0,
-                                   const double cartTol = AVOSPGLIB_TOL,
-                                   bool standardize = false);
+                                   const double cartTol = AVOSPGLIB_TOL);
 
     /**
      * Symmetrize the crystal described by the arguments.

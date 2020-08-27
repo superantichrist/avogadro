@@ -292,7 +292,6 @@ namespace Avogadro
       SymmetrizeCrystalIndex,
       // Reduce
       PrimitiveReduceIndex,
-      PrimitiveReduceStandardIndex,
       NiggliReduceIndex,
       SettingsMainSep1Index,
       // Settings
@@ -360,7 +359,6 @@ namespace Avogadro
     void actionReduceToAsymmetricUnit();
     void actionSymmetrizeCrystal(bool skipUndo = false);
     void actionPrimitiveReduce();
-    void actionPrimitiveReduceStandard();
     void actionNiggliReduce();
     void actionToggleUnitCell();
     void actionBuildSlab();

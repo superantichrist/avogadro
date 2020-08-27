@@ -33,6 +33,7 @@
 #include <openbabel/mol.h>
 
 #include <Eigen/Geometry>
+#include <Eigen/LeastSquares>
 
 #include <vector>
 

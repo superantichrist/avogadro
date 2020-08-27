@@ -75,9 +75,8 @@ namespace Avogadro {
     glDisable( GL_NORMALIZE );
     glEnable( GL_RESCALE_NORMAL );
 
-    // Render the atoms and images
-    QList<Atom *> allAtoms = atoms() + atomImages();
-    foreach(Atom *a, allAtoms)
+    // Render the atoms
+    foreach(Atom *a, atoms())
       renderOpaque(pd, a);
 
     // render bonds (sticks)
@@ -101,9 +100,8 @@ namespace Avogadro {
     map->setToSelectionColor();
     pd->painter()->setColor(map);
 
-    // Render the atoms and images
-    QList<Atom *> allAtoms = atoms() + atomImages();
-    foreach(Atom *a, allAtoms) {
+    // Render the atoms
+    foreach(Atom *a, atoms()) {
       if (pd->isSelected(a)) {
         pd->painter()->setName(a);
         pd->painter()->drawSphere(a->pos(), SEL_ATOM_EXTRA_RADIUS + radius(a));
@@ -127,13 +125,13 @@ namespace Avogadro {
 
     return true;
   }
-
+  
   bool StickEngine::renderPick(PainterDevice *pd)
   {
     glDisable( GL_NORMALIZE );
     glEnable( GL_RESCALE_NORMAL );
 
-    // Render the atoms (no images)
+    // Render the atoms
     foreach(Atom *a, atoms())
       renderPick(pd, a);
 

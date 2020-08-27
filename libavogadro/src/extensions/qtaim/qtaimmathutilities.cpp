@@ -28,7 +28,6 @@
 
 #include <cmath>
 #include <Eigen/QR>
-#include <Eigen/Eigenvalues>
 
 namespace Avogadro {
   namespace QTAIMMathUtilities {
