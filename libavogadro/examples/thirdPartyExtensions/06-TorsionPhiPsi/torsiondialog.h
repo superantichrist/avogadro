@@ -1,5 +1,5 @@
 /**********************************************************************
-  RotateSelectionExtension
+  TorsionExtension
 
   Copyright (C) 2010 David C. Lonie
 
@@ -14,48 +14,41 @@
   GNU General Public icense for more details.
  ***********************************************************************/
 
-#ifndef ROTATESELECTIONDIALOG_H
-#define ROTATESELECTIONDIALOG_H
-
-//#include "config.h"
-
-#include <Eigen/Core>
+#ifndef TORSIONDIALOG_H
+#define TORSIONDIALOG_H
 
 #include <QtGui/QDialog>
 
-#include "ui_rotateselectiondialog.h"
+#include "ui_torsiondialog.h"
 
+// Forward declaration of Avogadro::Molecule
 namespace Avogadro {
   class Molecule;
+  class PlotPoint;
 }
 
-namespace RotateSelection {
+using Avogadro::PlotPoint;
 
-  class RotateSelectionDialog : public QDialog
+namespace Torsion {
+
+  class TorsionDialog : public QDialog
   {
     // The Q_OBJECT macro must be include if a class is to have
     // signals/slots
     Q_OBJECT
 
   public:
-    explicit RotateSelectionDialog(QWidget *parent = 0, Qt::WindowFlags f = 0 );
-    virtual ~RotateSelectionDialog() {};
-
-    void getTransform(Eigen::Vector3d *axis,
-                      Eigen::Vector3d *offset,
-                      double *angle);
-
-  signals:
-    void requestUpdateAxisFromBond();
-    void requestApply();
+    explicit TorsionDialog(QWidget *parent = 0, Qt::WindowFlags f = 0 );
+    virtual ~TorsionDialog() {};
 
   public slots:
-    void setAxis(const Eigen::Vector3d &axis,
-                 const Eigen::Vector3d &offset);
+    void refresh(Avogadro::Molecule *mol);
+    void updateConformer(PlotPoint *p);
 
   private:
     // This member provides access to all ui elements
-    Ui::RotateSelectionDialog ui;
+    Ui::TorsionDialog ui;
+    Avogadro::Molecule *m_molecule;
   };
 }
 

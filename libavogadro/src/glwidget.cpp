@@ -1750,6 +1750,10 @@ namespace Avogadro {
         // numBonds
         y += d->pd->painter()->drawText
           (x, y, tr("Bonds: %L1").arg(d->molecule->numBonds()));
+
+        // Energy
+        y += d->pd->painter()->drawText
+          (x, y, tr("Energy: %L1").arg(d->molecule->energy()));
       }
     } // end debug
 

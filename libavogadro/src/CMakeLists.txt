@@ -36,7 +36,7 @@ set(libavogadro_HDRS
   color3f.h
   colorbutton.h
   color.h
-  ${CMAKE_CURRENT_BINARY_DIR}/config.h
+  #config.h
   cube.h
   dockextension.h
   dockwidget.h
@@ -225,7 +225,11 @@ else()
   set(header_cmd "copy_if_different")
 endif()
 foreach(headerFile ${libavogadro_HDRS})
-  set(from "${CMAKE_CURRENT_SOURCE_DIR}/${headerFile}")
+  if(headerFile STREQUAL "config.h")
+     set(from "${CMAKE_CURRENT_BINARY_DIR}/${headerFile}")
+  else()
+     set(from "${CMAKE_CURRENT_SOURCE_DIR}/${headerFile}")
+  endif()
   set(to   "${libavogadro_BINARY_DIR}/include/avogadro/${headerFile}")
   execute_process(COMMAND ${CMAKE_COMMAND} -E ${header_cmd} "${from}" "${to}")
 endforeach()

@@ -47,20 +47,24 @@ namespace DynamicDisplay {
   {
     // Reset the label
     ui.label_numHydrogens->setText(tr("N/A"));
+    ui.label_numAtoms->setText(tr("N/A"));
   }
 
   void DynamicDisplayDialog::update(Molecule *mol)
   {
     // Count the number of hydrogen atoms:
     unsigned int count = 0;
+    unsigned int count_total = 0;
     for (int i = 0; i < mol->atoms().size(); i++) {
       if (mol->atoms().at(i)->atomicNumber() == 1) {
         count++;
       }
+      count_total++;
     }
 
     // Display the number of hydrogens
     ui.label_numHydrogens->setText(QString::number(count));
+    ui.label_numAtoms->setText(QString::number(count_total));
   }
 
 }

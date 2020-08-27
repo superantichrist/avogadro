@@ -6,7 +6,7 @@ if(NOT EIGEN3_FOUND)
 else()
   set (EIGEN2_SUPPORT_STAGE10_FULL_EIGEN2_API TRUE)
 endif()
-
+cmake_policy(SET CMP0022 NEW)
 include_directories(${QT_INCLUDE_DIR} ${EIGEN2_INCLUDE_DIR})
 
 # Headers for our public API

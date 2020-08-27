@@ -875,7 +875,7 @@ namespace Avogadro {
      * listening to this signal should tear town its cache/model and rebuild it.
      */
     void updateMolecule();
-
+    void updateEnergy();
   private Q_SLOTS:
     /**
      * Function which handles when a child primitive has been

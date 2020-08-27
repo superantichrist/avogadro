@@ -365,7 +365,7 @@ namespace Avogadro
           return;
 
         m_molecule->setConformer(rowNum);
-        m_molecule->update();
+        m_molecule->updateMolecule();
         return;
       }
     }

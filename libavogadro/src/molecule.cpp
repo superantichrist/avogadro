@@ -54,6 +54,7 @@
 #include <QtCore/QDebug>
 #include <QtCore/QVariant>
 #include <QtCore/QVector>
+#include <QString>
 
 namespace Avogadro{
 
@@ -931,6 +932,20 @@ namespace Avogadro{
   {
     Bond *bond = qobject_cast<Bond *>(sender());
     emit bondUpdated(bond);
+  }
+
+  void Molecule::updateEnergy()
+  {
+      OpenBabel::OBForceField* forceField = OpenBabel::OBForceField::FindForceField( "MMFF94" );;
+      OpenBabel::OBMol mol = OBMol();
+      OpenBabel::OBFFConstraints constraints;
+      if ( !forceField->Setup( mol, constraints ) ) {
+        forceField = OpenBabel::OBForceField::FindForceField("UFF");
+      }
+
+      double energy = forceField->Energy();
+      energy *= KCAL_TO_KJ;
+      setEnergy(energy);
   }
 
   void Molecule::update()
