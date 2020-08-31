@@ -537,6 +537,7 @@ namespace Avogadro {
      */
     Eigen::Vector3d dipoleMoment(bool *estimate = 0) const;
 
+    std::vector<std::vector<unsigned int> > FindBackboneTorsion(std::vector<std::vector<unsigned int> > torsions);
     /**
      * Calculate the partial charges on each atom.
      */

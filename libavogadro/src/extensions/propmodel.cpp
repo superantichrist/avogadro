@@ -123,6 +123,11 @@ namespace Avogadro {
         updateCache();
       return m_torsionData.size();
     }
+    else if (m_type == PhiPsiType) {
+      if (!m_validCache)
+        updateCache();
+      return m_torsionData.size();
+    }
     return 0;
   }
 
@@ -137,6 +142,8 @@ namespace Avogadro {
     case AngleType:
       return 5 + numConformers() - 1;
     case TorsionType:
+      return 6 + numConformers() - 1;
+    case PhiPsiType:
       return 6 + numConformers() - 1;
       /*case CartesianType:
         return 3;*/
@@ -184,6 +191,12 @@ namespace Avogadro {
         else
           return Qt::AlignHCenter + Qt::AlignVCenter;
       }
+        else if (m_type == PhiPsiType) {
+          if (index.column() >= 5)
+            return Qt::AlignRight + Qt::AlignVCenter; // dihedral angle
+          else
+            return Qt::AlignHCenter + Qt::AlignVCenter;
+        }
     }
 
     if (role != Qt::UserRole && role != Qt::DisplayRole)
@@ -328,7 +341,36 @@ namespace Avogadro {
       }
 
 
-    } /*else if (m_type == CartesianType) {
+    }
+    else if (m_type == PhiPsiType) {
+
+      if (!m_validCache)
+        updateCache();
+
+      TorsionColumn column=static_cast<TorsionColumn>(index.column());
+      switch (column) {
+      case TorsionDataType:
+        return m_torsionData.at(index.row()).at(0).toString();
+      case TorsionDataAtom1:
+        return m_torsionData.at(index.row()).at(1);
+      case TorsionDataAtom2:
+        return m_torsionData.at(index.row()).at(2);
+      case TorsionDataAtom3:
+        return m_torsionData.at(index.row()).at(3);
+      case TorsionDataAtom4:
+        return m_torsionData.at(index.row()).at(4);
+      default:
+        QString format("%L1");
+        double torsion =  m_torsionValues.at( conformerFromIndex( index ) ).at(index.row());
+        if (sortRole)
+          return torsion;
+        else
+          return format.arg(torsion, 0, 'f', 4);
+      }
+
+
+    }
+    /*else if (m_type == CartesianType) {
         if (static_cast<unsigned int>(index.row()) >= m_molecule->numAtoms())
         return QVariant();
 
@@ -493,7 +535,29 @@ namespace Avogadro {
         }
       } else
         return tr("Torsion") + QString(" %1").arg(section + 1);
-    } /*else if (m_type == CartesianType) {
+    }
+    else if (m_type == PhiPsiType) {
+          if (orientation == Qt::Horizontal) {
+            unsigned int column= static_cast<TorsionColumn>(section);
+            switch (section) {
+            case 0:
+              return tr("Type");
+            case TorsionDataAtom1:
+            case TorsionDataAtom2:
+            case TorsionDataAtom3:
+            case TorsionDataAtom4:
+              return tr("Atom %1").arg(column);
+            default:
+              if( numConformers() > 1 )
+                return trUtf8("Conformer %1\nTorsion %2", "Degree symbol").arg(column-4).arg("(\xB0)");
+              else
+                return trUtf8("Torsion %1", "Degree symbol").arg("(\xB0)");
+
+            }
+          } else
+            return tr("Torsion") + QString(" %1").arg(section + 1);
+        }
+    /*else if (m_type == CartesianType) {
         if (orientation == Qt::Horizontal) {
         switch (section) {
         case 0:
@@ -559,6 +623,18 @@ namespace Avogadro {
       }
     }
     else if (m_type == TorsionType) {
+      switch ( static_cast<TorsionColumn>(index.column()) ) {
+      case TorsionDataType:
+      case TorsionDataAtom1:
+      case TorsionDataAtom2:
+      case TorsionDataAtom3:
+      case TorsionDataAtom4:
+        return QAbstractItemModel::flags(index);
+      default: // dihedral angle
+        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+      }
+    }
+    else if (m_type == PhiPsiType) {
       switch ( static_cast<TorsionColumn>(index.column()) ) {
       case TorsionDataType:
       case TorsionDataAtom1:
@@ -719,7 +795,7 @@ namespace Avogadro {
           return true;
         }
     }
-    else if (m_type == TorsionType) {
+    else if (m_type == TorsionType || m_type == PhiPsiType) {
 
       // Dihedral angles (torsions) are defined like so:
       // a
@@ -865,6 +941,12 @@ namespace Avogadro {
         m_angles.clear();
       }
     else if (m_type == TorsionType)
+      {
+        m_torsionData.clear();
+        m_torsionValues.clear();
+        m_torsions.clear();
+      }
+    else if (m_type == PhiPsiType)
       {
         m_torsionData.clear();
         m_torsionValues.clear();
@@ -1046,6 +1128,91 @@ namespace Avogadro {
 
             m_angleValues.push_back( valueListTmp );
           }
+        else if (m_type == PhiPsiType)
+        {
+            myOBMol->FindTorsions();
+            OBTorsionData *td = static_cast<OBTorsionData *>(myOBMol->GetData(TorsionData));
+            vector<OBTorsion> torsions = td->GetData();
+            pair<OBAtom*,OBAtom*> torsionBC;
+            vector<triple<OBAtom*,OBAtom*,double> > torsionADs;
+            vector<OBTorsion>::iterator i;
+            vector<triple<OBAtom*,OBAtom*,double> >::iterator j;
+
+            OBAtom *a,*b,*c,*d;
+
+            // Add to the list for all conformers
+            vector<vector<unsigned int> > mytorsions;
+            td->FillTorsionArray(mytorsions);
+            m_torsions.push_back( mytorsions );
+
+            double dihedralAngle;
+            valueListTmp.clear();
+            for (i = torsions.begin(); i != torsions.end(); ++i) {
+              torsionBC = i->GetBC();
+              torsionADs = i->GetADs();
+              b = torsionBC.first;
+              c = torsionBC.second;
+              for (j = torsionADs.begin(); j != torsionADs.end(); ++j) {
+                  a = j->first;
+                  d = j->second;
+                  if( !(b->GetResidue()->GetAtomID(b).compare("N")==0
+                          && c->GetResidue()->GetAtomID(c).compare("CA")==0
+                          && a->GetResidue()->GetAtomID(a).compare("C")==0
+                          && d->GetResidue()->GetAtomID(d).compare("C")==0)
+                         &&
+                          !(b->GetResidue()->GetAtomID(b).compare("CA")==0
+                                                    && c->GetResidue()->GetAtomID(c).compare("C")==0
+                                                    && a->GetResidue()->GetAtomID(a).compare("N")==0
+                                                    && d->GetResidue()->GetAtomID(d).compare("N")==0)
+                          )
+                  {
+                      continue;
+                  }
+                // Add data shared by all conformers
+                if (numConf==0)
+                  {
+
+                    tmpQVariantVector.clear();
+                    //Type
+                    tmpQVariantVector.push_back( QVariant(
+                                                          angleTypeString(copy_molecule->atom(j->first->GetIdx()-1),
+                                                                          copy_molecule->atom(torsionBC.first->GetIdx()-1),
+                                                                          copy_molecule->atom(torsionBC.second->GetIdx()-1),
+                                                                          copy_molecule->atom(j->second->GetIdx()-1))
+                                                          ));
+                    //Atom1
+                    tmpQVariantVector.push_back( QVariant(
+                                                          groupIndexString(copy_molecule->atom(j->first->GetIdx()-1))
+                                                          ));
+                    //Atom2
+                    tmpQVariantVector.push_back( QVariant(
+                                                          groupIndexString(copy_molecule->atom(torsionBC.first->GetIdx()-1))
+                                                          ));
+                    //Atom3
+                    tmpQVariantVector.push_back( QVariant(
+                                                          groupIndexString(copy_molecule->atom(torsionBC.second->GetIdx()-1))
+                                                          ));
+                    //Atom4
+                    tmpQVariantVector.push_back( QVariant(
+                                                          groupIndexString(copy_molecule->atom(j->second->GetIdx()-1))
+                                                          ));
+                    // Now add final data structure
+                    m_torsionData.push_back( tmpQVariantVector );
+                  }
+
+                dihedralAngle = myOBMol->GetTorsion(j->first,
+                                                    torsionBC.first,
+                                                    torsionBC.second,
+                                                    j->second);
+                if (numeric_limits<double>::has_infinity &&
+                    dihedralAngle == numeric_limits<double>::infinity())
+                  dihedralAngle = 0.0;
+                valueListTmp.push_back(dihedralAngle);
+              }
+            }
+            m_torsionValues.push_back( valueListTmp );
+          } // end TorsionType
+
         else if (m_type == TorsionType)
           {
             myOBMol->FindTorsions();
@@ -1059,6 +1226,7 @@ namespace Avogadro {
             // Add to the list for all conformers
             vector<vector<unsigned int> > mytorsions;
             td->FillTorsionArray(mytorsions);
+            mytorsions = m_molecule->FindBackboneTorsion(mytorsions);
             m_torsions.push_back( mytorsions );
 
             double dihedralAngle;
@@ -1160,6 +1328,12 @@ namespace Avogadro {
         return index.column()-4;
     }
     else if (m_type == TorsionType) {
+      if ( index.column() < 5 )
+        return 0;
+      else
+        return index.column()-5;
+    }
+    else if (m_type == PhiPsiType) {
       if ( index.column() < 5 )
         return 0;
       else

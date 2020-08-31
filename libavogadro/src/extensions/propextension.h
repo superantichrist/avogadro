@@ -76,6 +76,7 @@ namespace Avogadro {
          BondType,
          AngleType,
          TorsionType,
+         PhiPsiType,
          //CartesianType,
          ConformerType,
          MoleculeType

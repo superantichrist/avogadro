@@ -52,6 +52,7 @@ namespace Avogadro
     BondPropIndex,
     AnglePropIndex,
     TorsionPropIndex,
+      PhiPsiPropIndex,
     //CartesianIndex,
     ConformerIndex
   };
@@ -86,6 +87,11 @@ namespace Avogadro
     m_actions.append( action );
 
     action = new QAction( this );
+    action->setText( tr("Phi/Psi Properties..." ));
+    action->setData(PhiPsiPropIndex);
+    m_actions.append( action );
+
+    action = new QAction( this );
     action->setText( tr("Conformer Properties..." ));
     action->setData(ConformerIndex);
     m_actions.append( action );
@@ -114,6 +120,7 @@ namespace Avogadro
     case BondPropIndex:
     case AnglePropIndex:
     case TorsionPropIndex:
+    case PhiPsiPropIndex:
     case ConformerIndex:
       return tr("&View") + '>' + tr("&Properties");
     };
@@ -176,6 +183,13 @@ namespace Avogadro
       // view will delete itself in PropertiesView::hideEvent using deleteLater().
       view = new PropertiesView(PropertiesView::TorsionType, widget);
       break;
+    case PhiPsiPropIndex: // torsion properties
+      // model will be deleted in PropertiesView::hideEvent using deleteLater().
+      model = new PropertiesModel(PropertiesModel::PhiPsiType);
+      model->setMolecule( m_molecule );
+      // view will delete itself in PropertiesView::hideEvent using deleteLater().
+      view = new PropertiesView(PropertiesView::PhiPsiType, widget);
+      break;
     /*case CartesianIndex: // cartesian editor
       // m_angleModel will be deleted in PropertiesView::hideEvent using deleteLater().
       model = new PropertiesModel(PropertiesModel::CartesianType);
@@ -217,15 +231,15 @@ namespace Avogadro
     dialog->setWindowTitle(view->windowTitle());
     QSize dialogSize = dialog->size();
     double width = view->horizontalHeader()->length()+view->verticalHeader()->width()+5;
-	if (model->rowCount() < 13) { // no scrollbar
-	  dialogSize.setHeight(view->horizontalHeader()->height()+model->rowCount()*30+5);
+    if (model->rowCount() < 13) { // no scrollbar
+      dialogSize.setHeight(view->horizontalHeader()->height()+model->rowCount()*30+5);
       dialogSize.setWidth(width);
     } else { // scrollbar is needed
       dialogSize.setHeight(width/1.618);
       dialogSize.setWidth(width+view->verticalScrollBar()->width());
     }
     dialog->resize(dialogSize);
-	//dialog->setWindowFlags(Qt::Window);
+    //dialog->setWindowFlags(Qt::Window);
     dialog->show();
 
     return undo;
@@ -249,6 +263,9 @@ namespace Avogadro
       break;
     case TorsionType:
       title = tr("Torsion Properties");
+      break;
+    case PhiPsiType:
+      title = tr("Phi/Psi Properties");
       break;
     /*case CartesianType:
       title = tr("Cartesian Properties");
@@ -289,7 +306,7 @@ namespace Avogadro
       int rowNum = model()->headerData(index.row(), Qt::Vertical).toString().split(" ").last().toLong(&ok) - 1;
       if (!ok)
         return;
-      
+
       if (m_type == AtomType /*|| m_type == CartesianType*/) {
         if ((unsigned int) index.row() >= m_molecule->numAtoms())
           return;
@@ -321,7 +338,7 @@ namespace Avogadro
         Atom *endAtom = m_molecule->atom((angles[rowNum][2]));
         Bond *bond1 = startAtom->bond(vertex);
         Bond *bond2 = vertex->bond(endAtom);
-        
+
         matchedPrimitives.append( startAtom );
         matchedPrimitives.append( vertex );
         matchedPrimitives.append( endAtom );
@@ -348,7 +365,7 @@ namespace Avogadro
         Bond *bond1 = a->bond(b);
         Bond *bond2 = b->bond(c);
         Bond *bond3 = c->bond(d);
-        
+
         matchedPrimitives.append(a);
         matchedPrimitives.append(b);
         matchedPrimitives.append(c);
@@ -360,7 +377,37 @@ namespace Avogadro
         m_widget->clearSelected();
         m_widget->setSelected(matchedPrimitives, true);
         m_widget->update();
-      } else if (m_type == ConformerType) {
+      } else if (m_type == PhiPsiType && model() != 0) {
+          OBMol *mol = new OBMol(m_molecule->OBMol());
+          mol->FindTorsions();
+          OBTorsionData *td = static_cast<OBTorsionData *>(mol->GetData(TorsionData));
+          if (!td)
+            return;
+          vector<vector<unsigned int> > torsions;
+          td->FillTorsionArray(torsions);
+          torsions = m_molecule->FindBackboneTorsion(torsions);
+          delete mol;
+
+          Atom *a = m_molecule->atom( torsions[rowNum][0] );
+          Atom *b = m_molecule->atom( torsions[rowNum][1] );
+          Atom *c = m_molecule->atom( torsions[rowNum][2] );
+          Atom *d = m_molecule->atom( torsions[rowNum][3] );
+          Bond *bond1 = a->bond(b);
+          Bond *bond2 = b->bond(c);
+          Bond *bond3 = c->bond(d);
+
+          matchedPrimitives.append(a);
+          matchedPrimitives.append(b);
+          matchedPrimitives.append(c);
+          matchedPrimitives.append(d);
+          matchedPrimitives.append(bond1);
+          matchedPrimitives.append(bond2);
+          matchedPrimitives.append(bond3);
+
+          m_widget->clearSelected();
+          m_widget->setSelected(matchedPrimitives, true);
+          m_widget->update();
+        } else if (m_type == ConformerType) {
         if (index.row() >= static_cast<int>(m_molecule->numConformers()))
           return;
 

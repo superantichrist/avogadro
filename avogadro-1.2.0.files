@@ -521,16 +521,12 @@ libavogadro/examples/thirdPartyExtensions/06-TorsionPhiPsi/build/CMakeFiles/3.5.
 libavogadro/examples/thirdPartyExtensions/06-TorsionPhiPsi/build/CMakeFiles/feature_tests.c
 libavogadro/examples/thirdPartyExtensions/06-TorsionPhiPsi/build/CMakeFiles/feature_tests.cxx
 libavogadro/examples/thirdPartyExtensions/06-TorsionPhiPsi/build/ui_torsiondialog.h
-libavogadro/examples/thirdPartyExtensions/06-TorsionPhiPsi/propmodel.cpp
-libavogadro/examples/thirdPartyExtensions/06-TorsionPhiPsi/propmodel.h
 libavogadro/examples/thirdPartyExtensions/06-TorsionPhiPsi/torsiondialog.cpp
 libavogadro/examples/thirdPartyExtensions/06-TorsionPhiPsi/torsiondialog.cpp
 libavogadro/examples/thirdPartyExtensions/06-TorsionPhiPsi/torsiondialog.h
 libavogadro/examples/thirdPartyExtensions/06-TorsionPhiPsi/torsiondialog.h
 libavogadro/examples/thirdPartyExtensions/06-TorsionPhiPsi/torsiondialog.ui
 libavogadro/examples/thirdPartyExtensions/06-TorsionPhiPsi/torsionextension.cpp
-libavogadro/examples/thirdPartyExtensions/06-TorsionPhiPsi/torsionextension.cpp
-libavogadro/examples/thirdPartyExtensions/06-TorsionPhiPsi/torsionextension.h
 libavogadro/examples/thirdPartyExtensions/06-TorsionPhiPsi/torsionextension.h
 libavogadro/src/animation.cpp
 libavogadro/src/animation.h

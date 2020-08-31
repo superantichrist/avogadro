@@ -1191,6 +1191,54 @@ namespace Avogadro{
     return d->ringList;
   }
 
+  std::vector<std::vector<unsigned int> > Molecule::FindBackboneTorsion(std::vector<std::vector<unsigned int> > torsions)
+  {
+      unsigned int ct = 0;
+      std::vector<std::vector<unsigned int> > newTorsions;
+      std::pair<OpenBabel::OBAtom*,OpenBabel::OBAtom*> torsionBC;
+      std::vector<OpenBabel::triple<OpenBabel::OBAtom*,OpenBabel::OBAtom*,double> > torsionADs;
+      std::vector<std::vector<unsigned int> >::iterator i;
+      std::vector<OpenBabel::triple<OpenBabel::OBAtom*,OpenBabel::OBAtom*,double> >::iterator j;
+      for (i = torsions.begin(); i != torsions.end(); ++i) {
+          Atom *a = this->atom( i->at(0) );
+          Atom *b = this->atom( i->at(1) );
+          Atom *c = this->atom( i->at(2) );
+          Atom *d = this->atom( i->at(3) );
+          QString temp = b->residue()->atomId(b->id());
+          std::string temp1 = temp.toStdString();
+          QString temp2 = c->residue()->atomId(c->id());
+          std::string temp21 = temp2.toStdString();
+          QString temp3 = a->residue()->atomId(a->id());
+          std::string temp31 = temp3.toStdString();
+          QString temp4 = d->residue()->atomId(d->id());
+          std::string temp41 = temp4.toStdString();
+          if( !((b->residue()->atomId(b->id()).trimmed() == "N")
+                  && (c->residue()->atomId(c->id()).trimmed() == "CA")
+                  && (a->residue()->atomId(a->id()).trimmed() == "C")
+                  && (d->residue()->atomId(d->id()).trimmed() == "C"))
+                 &&
+                  !((b->residue()->atomId(b->id()).trimmed() == "CA")
+                                    && (c->residue()->atomId(c->id()).trimmed() == "C")
+                                    && (a->residue()->atomId(a->id()).trimmed() == "N")
+                                    && (d->residue()->atomId(d->id()).trimmed() == "N"))
+                  )
+          {
+
+          }
+          else {
+              std::vector<unsigned int> newTorsion;
+              newTorsion.push_back(i->at(0));
+              newTorsion.push_back(i->at(1));
+              newTorsion.push_back(i->at(2));
+              newTorsion.push_back(i->at(3));
+              newTorsions.push_back(newTorsion);
+          }
+      }
+
+      return newTorsions;
+  }
+
+
   OpenBabel::OBMol Molecule::OBMol() const
   {
     Q_D(const Molecule);
