@@ -145,7 +145,8 @@ namespace Avogadro {
   void Residue::updateAtom()
   {
     // We can't trust our atom ids anymore, so we'll let Open Babel guess them.
-    m_atomId.clear();
+      // if we clear this, we can't retain residue info when modify phi/psi
+//    m_atomId.clear();
   }
 
 } // End namespace

@@ -1143,6 +1143,7 @@ namespace Avogadro {
             // Add to the list for all conformers
             vector<vector<unsigned int> > mytorsions;
             td->FillTorsionArray(mytorsions);
+            mytorsions = m_molecule->FindBackboneTorsion(mytorsions);
             m_torsions.push_back( mytorsions );
 
             double dihedralAngle;
@@ -1226,7 +1227,6 @@ namespace Avogadro {
             // Add to the list for all conformers
             vector<vector<unsigned int> > mytorsions;
             td->FillTorsionArray(mytorsions);
-            mytorsions = m_molecule->FindBackboneTorsion(mytorsions);
             m_torsions.push_back( mytorsions );
 
             double dihedralAngle;
